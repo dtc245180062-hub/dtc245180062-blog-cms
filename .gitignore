@@ -1,0 +1,5 @@
+.env
+nginx/.htpasswd
+nginx/certs/*.key
+nginx/certs/*.crt
+*.log

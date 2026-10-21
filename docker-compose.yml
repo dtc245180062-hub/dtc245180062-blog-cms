@@ -1,0 +1,101 @@
+# Đề 7 - Hệ thống Blog/CMS: WordPress + MySQL + phpMyAdmin + Nginx
+# Triển khai bằng Docker Compose.
+
+name: blogcms
+
+x-hardening: &hardening
+  security_opt:
+    - no-new-privileges:true
+  restart: unless-stopped
+
+services:
+  # ---------------------------------------------------------------- MySQL
+  db:
+    image: mysql:8.0
+    <<: *hardening
+    container_name: blogcms-db
+    command:
+      - --skip-name-resolve
+      - --local-infile=0
+      - --max-connections=100
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${WP_DB_NAME}
+      MYSQL_USER: ${WP_DB_USER}        # user riêng, chỉ có quyền trên DB wordpress
+      MYSQL_PASSWORD: ${WP_DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks: [database]               # mạng internal, không ra Internet, không publish port
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ------------------------------------------------------------ WordPress
+  wordpress:
+    image: wordpress:6-php8.3-fpm-alpine
+    <<: *hardening
+    container_name: blogcms-wordpress
+    user: "82:82"                      # www-data (alpine) -> chạy NON-ROOT
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: ${WP_DB_NAME}
+      WORDPRESS_DB_USER: ${WP_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WP_DB_PASSWORD}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('DISALLOW_FILE_EDIT', true);
+        define('FORCE_SSL_ADMIN', true);
+    volumes:
+      - wp_data:/var/www/html
+    networks: [frontend, database]
+    cap_drop: [ALL]
+
+  # ---------------------------------------------------------- phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin:5.2-apache
+    <<: *hardening
+    container_name: blogcms-phpmyadmin
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 0
+      UPLOAD_LIMIT: 16M
+    networks: [frontend, database]     # KHÔNG publish port, chỉ vào qua Nginx + basic auth
+
+  # ---------------------------------------------------------------- Nginx
+  nginx:
+    image: nginxinc/nginx-unprivileged:1.27-alpine   # non-root (uid 101)
+    <<: *hardening
+    container_name: blogcms-nginx
+    depends_on: [wordpress, phpmyadmin]
+    ports:
+      - "80:8080"       # HTTP  -> redirect sang HTTPS
+      - "443:8443"      # HTTPS -> WordPress
+      - "9443:9443"     # HTTPS -> phpMyAdmin (basic auth)
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./nginx/.htpasswd:/etc/nginx/.htpasswd:ro
+      - wp_data:/var/www/html:ro        # phục vụ file tĩnh của WordPress
+    networks: [frontend]
+    cap_drop: [ALL]
+
+networks:
+  frontend:
+    driver: bridge
+  database:
+    driver: bridge
+    internal: true      # network isolation: DB không thể ra/vào từ ngoài
+
+volumes:
+  db_data:
+  wp_data:
