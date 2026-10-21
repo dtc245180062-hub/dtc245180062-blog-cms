@@ -1134,6 +1134,115 @@
      "refId": "A"
     }
    ]
+  },
+  {
+   "id": 24,
+   "type": "row",
+   "title": "Log tập trung (Loki)",
+   "gridPos": {
+    "x": 0,
+    "y": 57,
+    "w": 24,
+    "h": 1
+   },
+   "collapsed": false,
+   "panels": []
+  },
+  {
+   "id": 25,
+   "type": "timeseries",
+   "title": "Nginx request theo status (LogQL)",
+   "datasource": {
+    "type": "loki",
+    "uid": "loki"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 58,
+    "w": 12,
+    "h": 8
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "lineWidth": 1,
+      "fillOpacity": 10
+     }
+    },
+    "overrides": []
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "loki"
+     },
+     "expr": "sum by (status) (count_over_time({service=\"nginx\"} | logfmt [1m]))",
+     "legendFormat": "{{status}}",
+     "refId": "A"
+    }
+   ]
+  },
+  {
+   "id": 26,
+   "type": "logs",
+   "title": "Log Nginx (4xx/5xx)",
+   "datasource": {
+    "type": "loki",
+    "uid": "loki"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 58,
+    "w": 12,
+    "h": 8
+   },
+   "options": {
+    "showTime": true,
+    "wrapLogMessage": true,
+    "sortOrder": "Descending"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "loki"
+     },
+     "expr": "{service=\"nginx\"} | logfmt | status >= 400",
+     "refId": "A"
+    }
+   ]
+  },
+  {
+   "id": 27,
+   "type": "logs",
+   "title": "Log lỗi MySQL / WordPress",
+   "datasource": {
+    "type": "loki",
+    "uid": "loki"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 66,
+    "w": 24,
+    "h": 8
+   },
+   "options": {
+    "showTime": true,
+    "wrapLogMessage": true,
+    "sortOrder": "Descending"
+   },
+   "targets": [
+    {
+     "datasource": {
+      "type": "loki",
+      "uid": "loki"
+     },
+     "expr": "{service=~\"db|wordpress\"} |~ \"(?i)error|warning|fatal\"",
+     "refId": "A"
+    }
+   ]
   }
  ]
 }

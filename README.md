@@ -28,13 +28,16 @@ docker compose ps
 
 Trình duyệt sẽ cảnh báo chứng chỉ tự ký: chọn *Advanced → Proceed*.
 
+![Kiến trúc](docs/images/architecture.png)
+
 ## Cấu trúc
 ```
 docker-compose.yml
 nginx/            nginx.conf, conf.d/, certs/ (tự sinh)
 mysql/init/       tạo user giám sát quyền tối thiểu
-monitoring/       prometheus/, grafana/ (datasource + dashboard provisioning)
-scripts/          gen-env.sh, gen-cert.sh
+monitoring/       prometheus/, loki/, promtail/, grafana/ (provisioning)
+docs/             logql-queries.md, HUONG_DAN.md, images/
+scripts/          gen-env.sh, gen-cert.sh, gen-traffic.sh
 ```
 
 ## Giám sát (Prometheus + Grafana)
@@ -43,6 +46,12 @@ scripts/          gen-env.sh, gen-cert.sh
 - Grafana → Dashboards → *Blog CMS* → **Blog CMS - Tổng quan hệ thống** (đã provisioning sẵn).
 - Nếu DB đã được tạo từ trước (volume cũ) thì tạo user giám sát bằng tay:
   `docker compose exec db bash /docker-entrypoint-initdb.d/02-exporter-user.sh`
+
+## Log tập trung (Loki + Promtail)
+- Promtail đọc log mọi container của project qua Docker socket (read-only) và đẩy vào Loki.
+- Grafana → **Explore** → datasource **Loki**. Các query mẫu: [`docs/logql-queries.md`](docs/logql-queries.md).
+- Tạo traffic mẫu: `./scripts/gen-traffic.sh`
+- Ví dụ nhanh: `{service="nginx"} | logfmt | status >= 400`
 
 ## Dừng / xóa
 ```bash

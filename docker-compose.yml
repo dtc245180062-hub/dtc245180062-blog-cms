@@ -115,7 +115,7 @@ services:
     <<: *hardening
     container_name: blogcms-grafana
     user: "472:472"
-    depends_on: [prometheus]
+    depends_on: [prometheus, loki]
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
@@ -184,6 +184,30 @@ services:
     networks: [monitoring, database]
     cap_drop: [ALL]
 
+  # ============================ LOG TẬP TRUNG (Commit 3) ============================
+  loki:
+    image: grafana/loki:3.2.0
+    <<: *hardening
+    container_name: blogcms-loki
+    user: "10001:10001"
+    command: ["-config.file=/etc/loki/loki-config.yml"]
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+    networks: [monitoring]             # không publish port; truy vấn qua Grafana
+    cap_drop: [ALL]
+
+  promtail:
+    image: grafana/promtail:3.2.0
+    <<: *hardening
+    container_name: blogcms-promtail
+    command: ["-config.file=/etc/promtail/promtail-config.yml"]
+    depends_on: [loki]
+    volumes:
+      - ./monitoring/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro   # cần để đọc log container (ngoại lệ: chạy root, mount read-only)
+    networks: [monitoring]
+
 networks:
   frontend:
     driver: bridge
@@ -199,3 +223,4 @@ volumes:
   wp_data:
   prometheus_data:
   grafana_data:
+  loki_data:
