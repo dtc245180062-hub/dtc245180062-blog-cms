@@ -207,7 +207,6 @@ services:
       - ./monitoring/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro   # cần để đọc log container (ngoại lệ: chạy root, mount read-only)
     networks: [monitoring]
-
 networks:
   frontend:
     driver: bridge
