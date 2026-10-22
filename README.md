@@ -1,6 +1,6 @@
 # Đề 7 – Hệ thống Blog/CMS (WordPress + MySQL + phpMyAdmin + Nginx)
 
-- Sinh viên: <HỌ TÊN> – MSSV: DTC245180062 – Lớp: <LỚP>
+- Sinh viên: <TRẦN TIẾN ĐẠT > – MSSV: DTC245180062 – Lớp: <KTPM K23C>
 - Môn: Triển khai và Quản trị Hệ thống Phần mềm
 - Stack: WordPress (php-fpm) · MySQL 8 · phpMyAdmin · Nginx reverse proxy (HTTPS tự ký)
 
