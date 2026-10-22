@@ -10,7 +10,7 @@ Docker Engine ≥ 24, Docker Compose v2, openssl, git. (Ubuntu 22.04/24.04 hoặ
 
 ## Chạy hệ thống
 ```bash
-git clone https://github.com/<Trantiendat>/dtc245180062-blog-cms.git
+git clone https://github.com/dtc245180062-hub/dtc245180062-blog-cms.git
 cd dtc245180062-blog-cms
 ./scripts/gen-env.sh            # sinh .env với mật khẩu mạnh
 ./scripts/gen-cert.sh localhost # chứng chỉ tự ký + .htpasswd (hoặc truyền IP máy chủ)
