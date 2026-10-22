@@ -1,7 +1,7 @@
 # Đề 7 – Hệ thống Blog/CMS (WordPress + MySQL + phpMyAdmin + Nginx)
 
 - Sinh viên: <TRẦN TIẾN ĐẠT >
-– MSSV: DTC245180062 – Lớp: <KTPM-K23C>
+– MSSV: DTC245180062 – Lớp: KTPM-K23C
 - Môn: Triển khai và Quản trị Hệ thống Phần mềm
 - Stack: WordPress (php-fpm) · MySQL 8 · phpMyAdmin · Nginx reverse proxy (HTTPS tự ký)
 
@@ -10,7 +10,7 @@ Docker Engine ≥ 24, Docker Compose v2, openssl, git. (Ubuntu 22.04/24.04 hoặ
 
 ## Chạy hệ thống
 ```bash
-git clone https://github.com/<user>/dtc245180062-blog-cms.git
+git clone https://github.com/<Trantiendat>/dtc245180062-blog-cms.git
 cd dtc245180062-blog-cms
 ./scripts/gen-env.sh            # sinh .env với mật khẩu mạnh
 ./scripts/gen-cert.sh localhost # chứng chỉ tự ký + .htpasswd (hoặc truyền IP máy chủ)
