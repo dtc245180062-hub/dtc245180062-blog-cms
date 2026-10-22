@@ -14,6 +14,8 @@ services:
     image: mysql:8.0
     <<: *hardening
     container_name: blogcms-db
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID, DAC_OVERRIDE]
     command:
       - --skip-name-resolve
       - --local-infile=0
@@ -62,6 +64,8 @@ services:
     image: phpmyadmin:5.2-apache
     <<: *hardening
     container_name: blogcms-phpmyadmin
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID, DAC_OVERRIDE, NET_BIND_SERVICE]
     depends_on:
       db:
         condition: service_healthy
